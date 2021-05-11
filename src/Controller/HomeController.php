@@ -4,46 +4,42 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class HomeController extends AbstractController
 {
     /**
-     * @Route(path="/home/{nom?}", name="home_index0_route")
+     * @Route(path="/home/{nom?}", name="home_index_route", methods={"GET", "POST"})
     */
-    public function index0(?string $nom): Response
+    public function index(?string $nom): Response
     {
+        if(!isset($nom)){
+            // throw new HttpException(404, 'On ne peut vous afficher la page de cette personne');
+            throw $this->createNotFoundException('On ne peut vous afficher la page de cette personne');
+        }
         return $this->render('home/index.html.twig', [
-            'controller_name' => $nom,
+            'controller_name' => $nom ,
         ]);
     }
     /**
-     * @Route(path="/home/{nom}", name="home_index_route", priority=2)
+     * @Route(path="/home/response/explicite", name="home_response_explicite_route", methods={"GET", "POST"})
     */
-    public function index(string $nom): Response
+    public function responseExplicite(): Response
     {
-        return $this->render('home/index.html.twig', [
-            'controller_name' => $nom . " route2" ,
-        ]);
-    }
+        $response = new Response("<p>Réponse explicite</p>", 200, ["content-type"=> "text/html"]);
 
-    /**
-     * @Route(path="/home/age/{age}", name="home_index2_route", requirements={"age"="\d{2,3}"})
-    */
-    public function index2(int $age): Response
-    {
-        return $this->render('home/index.html.twig', [
-            'controller_name' => $age,
-        ]);
+        return $response;
     }
-
     /**
-     * @Route(path="/home/age2/{age<\d{2,3}>}", name="home_index3_route")
+     * @Route(path="/home/json", name="home_json_route", methods={"GET"}, priority=2)
     */
-    public function index3(int $age): Response
+    public function customJson(): Response
     {
-        return $this->render('home/index.html.twig', [
-            'controller_name' => $age,
-        ]);
+        $response = new Response("<p>Réponse explicite</p>", 200, ["content-type"=> "text/html"]);
+        $projetDir = $this->getParameter("kernel.project_dir");
+        $email = $this->getParameter("email");
+        return new JsonResponse(["nom"=>"BOUVANESVARY", "prenom"=>"Souprmanien", "projetDir" => $projetDir, "email"=> $email]);
     }
 }
